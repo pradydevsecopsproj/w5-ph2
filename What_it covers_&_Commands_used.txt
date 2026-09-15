@@ -36,7 +36,7 @@ helm repo add argo https://argoproj.github.io/argo-helm;
 helm repo update;
 helm install argo-rollouts argo/argo-rollouts -n argo-rollouts --create-namespace
 
-step-2 [add the rollout manifest file and apply]
+step-2 [Deploy a CANARY Rollout ...add the rollout manifest file and apply]
 ===============================================
 Note: Here "deploy-canary-rollout.yaml" consists  required both 'rollout' and 'service' related service files 
  k apply -f deploy-canary-rollout.yaml 
