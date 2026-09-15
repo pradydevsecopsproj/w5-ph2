@@ -1,0 +1,39 @@
+name: Terraform CI
+
+on:
+  # on: [pull_request, push, workflow_dispatch] // for Pre-commit hook -gitLeak
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  TF_ENV: prod
+  TF_VERSION: '1.15.5'
+  AWS_REGION: ap-south-1
+
+
+ concurrency:
+   group: terraform-ci-${{ github.workflow }}-${{ github.ref }}
+   cancel-in-progress: true 
+
+jobs:
+  scan:
+    name: gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+  
+
+      # Terraform initialization,
+      # plan and apply...

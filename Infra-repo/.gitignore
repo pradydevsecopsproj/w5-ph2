@@ -1,0 +1,111 @@
+# ============================================================
+# Terraform
+# ============================================================
+
+# Terraform working directory
+**/.terraform/*
+.terraform/
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Terraform crash logs
+crash.log
+crash.*.log
+
+# Terraform plan files
+*.tfplan
+*.plan
+plan.out
+
+# Terraform override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform CLI configuration
+.terraformrc
+terraform.rc
+
+
+# ============================================================
+# Sensitive / Environment-specific Variables
+# ============================================================
+
+# Variable files containing secrets or environment-specific values
+*.tfvars
+*.tfvars.json
+
+# Allow example/template variable files
+!*.tfvars.example
+!*.tfvars.sample
+
+
+# ============================================================
+# Secrets / Credentials
+# ============================================================
+
+# AWS credentials
+.aws/
+credentials
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Private keys / certificates
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Terraform-generated sensitive files
+*.secret
+*.secrets
+
+
+# ============================================================
+# Terraform Dependency Lock
+# ============================================================
+
+# DO NOT ignore this file.
+# .terraform.lock.hcl should normally be committed.
+
+# ============================================================
+# IDE / Editor Files
+# ============================================================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+
+# ============================================================
+# OS Files
+# ============================================================
+
+Thumbs.db
+Desktop.ini
+
+
+# ============================================================
+# Logs
+# ============================================================
+
+*.log
+
+
+# ============================================================
+# Temporary Files
+# ============================================================
+
+*.tmp
+*.temp
+*.bak

@@ -1,0 +1,106 @@
+ArgoRollout (Referrd https://www.youtube.com/watch?v=eAF1UsOqXYI 
+https://github.com/guymenahem/how-to-devops-tools/tree/main/argo-rollouts)
+
+Coverage: Advanced Kubernetes deployment strategies such as Canary and Blue-Green made easy using ArgoRollout
+          watch the deployments using CLI and argo rollout UI
+          ---------- Here the demo deploys NGINX pods
+
+
+Here used 
+**VPC** ==> Current work To instant reserve (31st AUG  8:30am] => C:\Pradyumna\AUG-SEPT\Week-4-jenkins\wk4-ph1-jenkins\Infra-repo\root
+
+**EKS** ==> C:\Pradyumna\AUG-SEPT\Week-4-jenkins\wk4-ph1-jenkins\Infra-repo\modules\EKS\
+Bare minimum EKS (no Private Nodes & related configs)
+
+
+Step -0 [Install Argo Rollouts Kubectl plugin with curl [https://argo-rollouts.readthedocs.io/en/stable/installation/#manual]
+=========================================================
+
+curl -LO https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
+For Linux dist, replace darwin with linux
+
+Make the kubectl-argo-rollouts binary executable.
+
+chmod +x ./kubectl-argo-rollouts-linux-amd64
+Move the binary into your PATH.
+
+
+sudo mv ./kubectl-argo-rollouts-linux-amd64 /usr/local/bin/kubectl-argo-rollouts
+Test to ensure the version you installed is up-to-date:
+
+kubectl argo rollouts version
+
+Step -1  [Deploy ArgoRollouts]
+==============================
+helm repo add argo https://argoproj.github.io/argo-helm;
+helm repo update;
+helm install argo-rollouts argo/argo-rollouts -n argo-rollouts --create-namespace
+
+step-2 [add the rollout manifest file and apply]
+===============================================
+Note: Here "deploy-canary-rollout.yaml" consists  required both 'rollout' and 'service' related service files 
+ k apply -f deploy-canary-rollout.yaml 
+
+Step-3 [ to check rollout dashboard ]-----------------------------------------------
+===========================================
+ k argo rollouts dashboard
+
+then check at http://localhost:3100/rollouts or http://127.0.0.1:3100/rollouts
+
+Step-4 [ Watch the rollout using the CLI ]
+===========================================
+kubectl argo rollouts get rollout canary-demo --watch
+The rollout is in pause, waiting for us to promote it
+
+
+Promote the rollout
+
+kubectl argo rollouts promote canary-demo
+Watch the rollout using the CLI
+kubectl argo rollouts get rollout canary-demo --watch
+
+------------
+Step -5 [ Deploy a Blue/Green Rollout]
+========================================
+add the rollout manifest file and apply]
+Note: Here "deploy-blue-green-rollout.yaml" consists  required both 'rollout' and 'service' related service files
+
+k apply -f deploy-blue-green-rollout.yaml
+
+Step-6 []
+==============
+Watch the rollout using the CLI
+kubectl argo rollouts get rollout bluegreen-demo --watch
+Trigger a rollout
+kubectl argo rollouts set image bluegreen-demo bluegreen-demo=nginx:1.24.0
+Watch the rollout using the CLI
+kubectl argo rollouts get rollout bluegreen-demo --watch
+The rollout is waiting for our approval
+
+Promote the rollout
+
+kubectl argo rollouts promote bluegreen-demo
+Watch the rollout using the CLI
+kubectl argo rollouts get rollout canary-demo --watch
+The pod will remain for 30 second for rollback
+
+After the rollout is done, lets rollback
+
+Trigger a rollout
+kubectl argo rollouts set image bluegreen-demo bluegreen-demo=nginx:1.25.0
+
+Promote the rollout
+kubectl argo rollouts promote bluegreen-demo
+
+Watch the rollout using the CLI
+kubectl argo rollouts get rollout bluegreen-demo --watch
+
+Trigger a rollout
+kubectl argo rollouts set image bluegreen-demo bluegreen-demo=nginx:1.24.0
+
+==============
+Cleanup
+=================
+
+k delete -f deploy-blue-green-rollout.yaml
+k delete -f deploy-canary-rollout.yaml

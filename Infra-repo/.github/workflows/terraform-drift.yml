@@ -1,0 +1,75 @@
+name: Terraform Drift Detection
+
+on:
+  schedule:
+    - cron: '30 1 * * *'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: ap-south-1
+  TF_VERSION: '1.15.8'
+  TF_WORKING_DIR: .
+
+concurrency:
+  group: terraform-drift-prod
+  cancel-in-progress: false
+
+jobs:
+
+  drift-detection:
+    name: Detect Terraform Drift
+    runs-on: ubuntu-latest
+
+    environment:
+      name: prod
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v6.2.3
+        with:
+          role-to-assume: ${{ secrets.AWS_TERRAFORM_DRIFT_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: github-actions-terraform-drift
+          allowed-account-ids: ${{ secrets.AWS_ACCOUNT_ID }}
+
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity
+
+      - name: Terraform Init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init -input=false
+
+      - name: Terraform Plan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          terraform plan \
+            -input=false \
+            -no-color \
+            -var-file="environments/prod.tfvars" \
+            -detailed-exitcode \
+            -out=drift.tfplan
+
+      - name: Drift detected
+        if: ${{ failure() }}
+        run: |
+          echo "Terraform drift detected or the Terraform plan failed."
+          exit 1
+```
